@@ -4,7 +4,8 @@ cd /home
 # let Jenkins clone the repo
 git clone https://github.com/dealii/dealii
 mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/home/install -DDEAL_II_WITH_CUDA=ON -DDEAL_II_WITH_CXX14=OFF ../dealii
+cmake -DCMAKE_INSTALL_PREFIX=/home/install -DDEAL_II_WITH_CUDA=ON \
+  -DDEAL_II_WITH_CXX14=OFF -DCMAKE_CXX_FLAGS="-Wno-pedantic" ../dealii
 # This should not be done but if we don't do it there is a warning on a 
 # line with the word error in it. When ctest check that the build was 
 # correct, it greps the word error, thinks that the build failed and
