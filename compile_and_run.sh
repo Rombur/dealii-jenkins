@@ -12,7 +12,7 @@ cmake -DCMAKE_INSTALL_PREFIX=/home/install -DDEAL_II_WITH_CUDA=ON \
 # correct, it greps the word error, thinks that the build failed and
 # stops right away.
 make -j12 
-ctest -DMAKEOPTS="-j12" -j12 -V -S ../dealii/tests/run_testsuite.cmake
+ctest -DTRACK="Continuous" -DMAKEOPTS="-j12" -j12 -V -S ../dealii/tests/run_testsuite.cmake
 # Because we clone the repo ourselves and didn't build deal.II at the right
 # place, we need to move the build directory ourselves so that Jenkins can parse
 # the output files.
