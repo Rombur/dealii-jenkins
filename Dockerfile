@@ -28,7 +28,7 @@ ENV PATH=/opt/cmake-3.9.1-Linux-x86_64/bin:$PATH
 RUN cd /home && \
     wget https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.gz && \
     tar xf boost_1_65_1.tar.gz && cd boost_1_65_1 && \
-    ./bootstrap.sh --prefix=/opt/boost && ./b2 install \
+    ./bootstrap.sh --prefix=/opt/boost && ./b2 install && \
     rm -r /home/*
 
 ENV BOOST_ROOT=/opt/boost
