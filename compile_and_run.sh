@@ -3,16 +3,14 @@ cd /home
 # This should be taken care of by Jenkins but there is a strange bug when we
 # let Jenkins clone the repo
 git clone https://github.com/dealii/dealii
-mkdir build && cd build
+cd /home && mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/home/install -DDEAL_II_WITH_CUDA=ON \
   -DDEAL_II_WITH_CXX14=OFF -DCMAKE_CXX_FLAGS="-Wno-pedantic" \
-  -DDEAL_II_WITH_ZLIB=OFF  ../dealii
-# This should not be done but if we don't do it there is a warning on a 
-# line with the word error in it. When ctest check that the build was 
-# correct, it greps the word error, thinks that the build failed and
-# stops right away.
-make -j12 
-ctest -DTRACK="Continuous" -DMAKEOPTS="-j12" -j12 -V -S ../dealii/tests/run_testsuite.cmake
+  -DDEAL_II_WITH_ZLIB=OFF -DDEAL_II_WITH_MPI=OFF \
+  -DDEAL_II_WITH_P4EST=OFF \
+  -DDEAL_II_WITH_TRILINOS=OFF \
+  ../dealii
+ctest -DTRACK="Continuous" -DMAKEOPTS="-j12" -j12 -V -S ../dealii/tests/run_testsuite.cmake > ctest_output.txt
 # Because we clone the repo ourselves and didn't build deal.II at the right
 # place, we need to move the build directory ourselves so that Jenkins can parse
 # the output files.
