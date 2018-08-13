@@ -102,7 +102,6 @@ RUN export TRILINOS_VERSION=12-12-1 && \
         -DTrilinos_ENABLE_Ifpack=ON \
         -DTrilinos_ENABLE_ML=ON \
         -DTrilinos_ENABLE_MueLu=ON \
-        -DTrilinos_ENABLE_Sacado=ON \
         -DTrilinos_ENABLE_EXPLICIT_INSTANTIATION=ON \
         -DCMAKE_INSTALL_PREFIX=${TRILINOS_INSTALL_DIR} \
         ${TRILINOS_SOURCE_DIR} && \
@@ -113,7 +112,7 @@ RUN export TRILINOS_VERSION=12-12-1 && \
 ENV TRILINOS_DIR=${INSTALL_DIR}/trilinos
 
 # Install p4est
-RUN export P4EST_VERSION=1.1 && \
+RUN export P4EST_VERSION=2.0 && \
     export P4EST_URL=http://p4est.github.io/release/p4est-${P4EST_VERSION}.tar.gz && \
     export P4EST_ARCHIVE=${ARCHIVE_DIR}/p4est-${P4EST_VERSION}.tar.gz && \
     export P4EST_SOURCE_DIR=${SOURCE_DIR}/p4est && \
