@@ -1,5 +1,5 @@
-#FROM nvidia/cuda:9.0-devel
-FROM nvidia/cuda:8.0-devel
+FROM nvidia/cuda:9.0-devel
+#FROM nvidia/cuda:8.0-devel
 
 # ssh is needed by openmpi
 RUN apt update && apt upgrade -y && apt install -y \
@@ -127,5 +127,10 @@ RUN export P4EST_VERSION=2.0 && \
     rm -rf ${P4EST_BUILD_DIR} && \
     rm -rf ${P4EST_SOURCE_DIR}
 ENV P4EST_DIR=${INSTALL_DIR}/p4est
+
+# Append the option flag --allow-run-as-root to mpiexec
+RUN echo '#!/usr/bin/env bash' > /usr/local/bin/mpiexec && \
+    echo '${INSTALL_DIR}/openmpi/bin/mpiexec --allow-run-as-root "$@"' >> /usr/local/bin/mpiexec && \
+    chmod +x /usr/local/bin/mpiexec
 
 COPY compile_and_run.sh /home/compile_and_run.sh
