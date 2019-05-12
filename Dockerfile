@@ -1,9 +1,11 @@
-FROM nvidia/cuda:9.0-devel
+FROM nvidia/cuda:10.1-devel
+#FROM nvidia/cuda:9.0-devel
 #FROM nvidia/cuda:8.0-devel
 
 # ssh is needed by openmpi
 RUN apt update && apt upgrade -y && apt install -y \
     build-essential \
+    gfortran \ 
     wget \
     zlib1g-dev \
     python-dev \
@@ -30,26 +32,24 @@ RUN mkdir -p ${PREFIX} && \
     mkdir source && \
     mkdir build
 
-# We need cmake 3.9 or later for CUDA
-RUN cd /home && \
-    wget https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz && \
-    tar xf cmake-3.12.1-Linux-x86_64.tar.gz && \
-    mv ./cmake-3.12.1-Linux-x86_64 ${INSTALL_DIR} && \
-    rm -r /home/*
-ENV PATH=${INSTALL_DIR}/cmake-3.12.1-Linux-x86_64/bin:$PATH
-
-# We need boost 1.65.1 or later for CUDA 9.0
-RUN cd /home && \
-    wget https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz && \
-    tar xf boost_1_68_0.tar.gz && cd boost_1_68_0 && \
-    ./bootstrap.sh --prefix=/opt/boost && ./b2 install && \
-    rm -r /home/*
-ENV BOOST_ROOT=${INSTALL_DIR}/boost
+# Install CMake
+RUN export CMAKE_VERSION=3.14.3 && \
+    export CMAKE_VERSION_SHORT=3.14 && \
+    export CMAKE_URL=https://cmake.org/files/v${CMAKE_VERSION_SHORT}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz && \
+    export CMAKE_ARCHIVE=${ARCHIVE_DIR}/cmake.tar.gz && \
+    export CMAKE_BUILD_DIR=${BUILD_DIR}/cmake && \
+    wget --quiet ${CMAKE_URL} --output-document=${CMAKE_ARCHIVE}  && \
+    mkdir -p ${CMAKE_BUILD_DIR} && \
+    tar xf ${CMAKE_ARCHIVE} -C ${CMAKE_BUILD_DIR} --strip-components=1 && \
+    mv ${CMAKE_BUILD_DIR} ${INSTALL_DIR} && \
+    rm -rf ${CMAKE_ARCHIVE} && \
+    rm -rf ${CMAKE_BUILD_DIR}
+ENV PATH=${INSTALL_DIR}/cmake/bin:$PATH
 
 # Install OpenMPI
-RUN export OPENMPI_VERSION=3.1.1 && \
-    export OPENMPI_VERSION_SHORT=3.1 && \
-    export OPENMPI_SHA1=86bc99c79a2c69a7d9b624d7f012929db78fc9a4 && \
+RUN export OPENMPI_VERSION=4.0.1 && \
+    export OPENMPI_VERSION_SHORT=4.0 && \
+    export OPENMPI_SHA1=35bf7c9162b08ecdc4876af573786cd290015631 && \
     export OPENMPI_URL=https://www.open-mpi.org/software/ompi/v${OPENMPI_VERSION_SHORT}/downloads/openmpi-${OPENMPI_VERSION}.tar.bz2 && \
     export OPENMPI_ARCHIVE=${ARCHIVE_DIR}/openmpi-${OPENMPI_VERSION}.tar.bz2 && \
     export OPENMPI_SOURCE_DIR=${SOURCE_DIR}/openmpi && \
@@ -70,8 +70,38 @@ RUN export OPENMPI_VERSION=3.1.1 && \
 # overwrite it
 ENV PATH=$PATH:${INSTALL_DIR}/openmpi/bin
 
+# Install Boost
+RUN export BOOST_VERSION=1.70.0 && \
+    export BOOST_VERSION_U=1_70_0 && \
+    export BOOST_URL=https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_U}.tar.bz2 && \
+    export BOOST_SHA256=430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778 && \
+    export BOOST_ARCHIVE=${ARCHIVE_DIR}/boost_${BOOST_VERSION_U}.tar.bz2 && \
+    export BOOST_SOURCE_DIR=${SOURCE_DIR}/boost && \
+    export BOOST_BUILD_DIR=${BUILD_DIR}/boost && \
+    export BOOST_INSTALL_DIR=${INSTALL_DIR}/boost && \
+    wget --quiet ${BOOST_URL} --output-document=${BOOST_ARCHIVE} && \
+    echo "${BOOST_SHA256} ${BOOST_ARCHIVE}" | sha256sum -c && \
+    mkdir -p ${BOOST_SOURCE_DIR} && \
+    tar -xf ${BOOST_ARCHIVE} -C ${BOOST_SOURCE_DIR} --strip-components=1 && \
+    cd ${BOOST_SOURCE_DIR} && \
+    ./bootstrap.sh \
+        --prefix=${BOOST_INSTALL_DIR} \
+        && \
+    echo "using mpi ;" >> project-config.jam && \
+    ./b2 -j${N_PROCS}\
+        --build-dir=${BOOST_BUILD_DIR} \
+        hardcode-dll-paths=true dll-path=${BOOST_INSTALL_DIR}/lib \
+        link=shared \
+        variant=release \
+        install \
+        && \
+    rm -rf ${BOOST_ARCHIVE} && \
+    rm -rf ${BOOST_BUILD_DIR} && \
+    rm -rf ${BOOST_SOURCE_DIR}
+ENV BOOST_ROOT=${INSTALL_DIR}/boost
+
 # Install Trilinos
-RUN export TRILINOS_VERSION=12-12-1 && \
+RUN export TRILINOS_VERSION=12-14-1 && \
     export TRILINOS_URL=https://github.com/trilinos/Trilinos/archive/trilinos-release-${TRILINOS_VERSION}.tar.gz && \
     export TRILINOS_ARCHIVE=${ARCHIVE_DIR}/trilinos.tar.gz && \
     export TRILINOS_SOURCE_DIR=${SOURCE_DIR}/trilinos && \
@@ -112,7 +142,7 @@ RUN export TRILINOS_VERSION=12-12-1 && \
 ENV TRILINOS_DIR=${INSTALL_DIR}/trilinos
 
 # Install p4est
-RUN export P4EST_VERSION=2.0 && \
+RUN export P4EST_VERSION=2.2 && \
     export P4EST_URL=http://p4est.github.io/release/p4est-${P4EST_VERSION}.tar.gz && \
     export P4EST_ARCHIVE=${ARCHIVE_DIR}/p4est-${P4EST_VERSION}.tar.gz && \
     export P4EST_SOURCE_DIR=${SOURCE_DIR}/p4est && \
