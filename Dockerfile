@@ -71,10 +71,10 @@ RUN export OPENMPI_VERSION=4.0.1 && \
 ENV PATH=$PATH:${INSTALL_DIR}/openmpi/bin
 
 # Install Boost
-RUN export BOOST_VERSION=1.70.0 && \
-    export BOOST_VERSION_U=1_70_0 && \
+RUN export BOOST_VERSION=1.67.0 && \
+    export BOOST_VERSION_U=1_67_0 && \
     export BOOST_URL=https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_U}.tar.bz2 && \
-    export BOOST_SHA256=430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778 && \
+    export BOOST_SHA256=2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba && \
     export BOOST_ARCHIVE=${ARCHIVE_DIR}/boost_${BOOST_VERSION_U}.tar.bz2 && \
     export BOOST_SOURCE_DIR=${SOURCE_DIR}/boost && \
     export BOOST_BUILD_DIR=${BUILD_DIR}/boost && \

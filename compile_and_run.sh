@@ -6,6 +6,7 @@ git clone https://github.com/dealii/dealii
 cd /home && mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/home/install -DDEAL_II_WITH_CUDA=ON \
   -DDEAL_II_WITH_CXX14=OFF  \
+  -DDEAL_II_WITH_CXX17=OFF  \
   -DDEAL_II_WITH_MPI=ON \
   -DDEAL_II_WITH_P4EST=ON \
   -DDEAL_II_WITH_TRILINOS=ON \
